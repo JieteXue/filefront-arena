@@ -57,6 +57,26 @@ test("arg overrides keep config defaults but prefer explicit command args", () =
   assert.equal(merged.game.duration, 30);
 });
 
+test("empty overrides do not reset existing local config", () => {
+  const config = {
+    network: {
+      server: { enabled: true, host: "0.0.0.0", port: 31337 },
+      client: { host: "10.16.189.111", port: 31337 }
+    },
+    game: {
+      duration: 20,
+      name: "Jet",
+      team: "red",
+      mode: "split"
+    }
+  };
+
+  const merged = mergeConfig(config, {});
+  assert.equal(merged.network.server.enabled, true);
+  assert.equal(merged.network.client.host, "10.16.189.111");
+  assert.equal(merged.game.name, "Jet");
+});
+
 test("FILEFRONT_CONFIG_DIR can move local config outside the package", () => {
   const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), "filefront-package-"));
   const configRoot = fs.mkdtempSync(path.join(os.tmpdir(), "filefront-user-"));

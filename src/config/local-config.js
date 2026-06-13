@@ -53,7 +53,7 @@ export function writeLocalConfig(projectRoot, config) {
 
 export function mergeConfig(base, override) {
   const normalizedBase = normalizeConfig(base);
-  const normalizedOverride = normalizeConfig(override);
+  const normalizedOverride = normalizeConfig(override, { fillDefaults: false });
   return {
     network: {
       server: {
@@ -103,30 +103,36 @@ export function applyArgOverrides(config, args) {
   return next;
 }
 
-function normalizeConfig(config = {}) {
+function normalizeConfig(config = {}, options = {}) {
+  const fillDefaults = options.fillDefaults !== false;
   const legacyServer = config.server || {};
   const legacyClient = config.client || {};
   const network = config.network || {};
   const game = config.game || {};
+  const defaults = fillDefaults ? DEFAULT_LOCAL_CONFIG : {};
 
   return {
     network: {
-      server: {
-        enabled: legacyServer.enabled ?? network.server?.enabled ?? DEFAULT_LOCAL_CONFIG.network.server.enabled,
-        host: legacyServer.host ?? network.server?.host ?? DEFAULT_LOCAL_CONFIG.network.server.host,
-        port: legacyServer.port ?? network.server?.port ?? DEFAULT_LOCAL_CONFIG.network.server.port
-      },
-      client: {
-        host: legacyClient.host ?? network.client?.host ?? DEFAULT_LOCAL_CONFIG.network.client.host,
-        port: legacyClient.port ?? network.client?.port ?? DEFAULT_LOCAL_CONFIG.network.client.port,
+      server: compactObject({
+        enabled: legacyServer.enabled ?? network.server?.enabled ?? defaults.network?.server?.enabled,
+        host: legacyServer.host ?? network.server?.host ?? defaults.network?.server?.host,
+        port: legacyServer.port ?? network.server?.port ?? defaults.network?.server?.port
+      }),
+      client: compactObject({
+        host: legacyClient.host ?? network.client?.host ?? defaults.network?.client?.host,
+        port: legacyClient.port ?? network.client?.port ?? defaults.network?.client?.port,
         ...(legacyClient.server || network.client?.server ? { server: legacyClient.server ?? network.client.server } : {})
-      }
+      })
     },
-    game: {
-      duration: legacyServer.duration ?? game.duration ?? DEFAULT_LOCAL_CONFIG.game.duration,
-      name: legacyClient.name ?? game.name ?? DEFAULT_LOCAL_CONFIG.game.name,
-      team: legacyClient.team ?? game.team ?? DEFAULT_LOCAL_CONFIG.game.team,
-      mode: legacyClient.mode ?? game.mode ?? DEFAULT_LOCAL_CONFIG.game.mode
-    }
+    game: compactObject({
+      duration: legacyServer.duration ?? game.duration ?? defaults.game?.duration,
+      name: legacyClient.name ?? game.name ?? defaults.game?.name,
+      team: legacyClient.team ?? game.team ?? defaults.game?.team,
+      mode: legacyClient.mode ?? game.mode ?? defaults.game?.mode
+    })
   };
+}
+
+function compactObject(value) {
+  return Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== undefined));
 }
