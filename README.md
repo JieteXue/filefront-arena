@@ -81,7 +81,6 @@ npx -y github:JieteXue/filefront-arena client --server http://SERVER_IP:31337 --
 
 ```bash
 npx -y github:JieteXue/filefront-arena#v0.1.1 client --server http://localhost:31337 --name alice --team red
-npx -y github:JieteXue/filefront-arena#v0.1.1 client --server http://192.168.1.23:31337 --name alice --team red
 ```
 
 安装依赖：
