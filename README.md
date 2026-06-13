@@ -10,6 +10,32 @@
 - 玩家可以用 `npx` 直接从 GitHub 启动，也可以 clone 本项目后本地运行。
 - 如果跨机器联机，server 所在机器需要允许其他电脑访问 `31337` 端口。
 
+## One-Line Install
+
+全局安装一次，以后直接使用 `filefront` 命令：
+
+```bash
+npm install -g github:JieteXue/filefront-arena
+```
+
+安装后启动客户端：
+
+```bash
+filefront client --server http://SERVER_IP:31337 --name alice --team red
+```
+
+macOS 三窗口客户端：
+
+```bash
+filefront split --server http://SERVER_IP:31337 --name alice --team red
+```
+
+不想全局安装，也可以每次直接用 `npx`：
+
+```bash
+npx -y github:JieteXue/filefront-arena client --server http://SERVER_IP:31337 --name alice --team red
+```
+
 安装依赖：
 
 ```bash
