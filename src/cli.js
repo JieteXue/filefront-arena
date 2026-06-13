@@ -9,7 +9,8 @@ const [command = "help", ...args] = process.argv.slice(2);
 const targets = {
   server: ["src/server/index.js", args],
   client: ["src/client/index.js", args],
-  split: ["scripts/open-split-client.mjs", args]
+  split: ["scripts/open-split-client.mjs", args],
+  join: ["scripts/join-client.mjs", args]
 };
 
 if (command === "help" || command === "--help" || command === "-h") {
@@ -41,10 +42,12 @@ Usage:
   filefront server --host 0.0.0.0 --port 31337 --duration 20
   filefront client --server http://localhost:31337 --name alice --team red
   filefront split  --server http://localhost:31337 --name alice --team red
+  filefront join   --host localhost --name alice --team red
 
 Commands:
   server   Start the match server
   client   Start one client window
   split    macOS only: open OP, INFO, and OPS Terminal windows
+  join     Join by host; macOS opens split windows by default
 `);
 }

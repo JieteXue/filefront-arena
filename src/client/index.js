@@ -2,10 +2,11 @@
 import { createSocket } from "./socket.js";
 import { runNativeClient } from "./native.js";
 import { runMonitorClient } from "./monitor.js";
+import { resolveServerUrl } from "./server-url.js";
 
 const args = parseArgs(process.argv.slice(2));
 const options = {
-  serverUrl: args.server || "http://localhost:31337",
+  serverUrl: resolveServerUrl(args),
   name: args.name || `op-${Math.random().toString(36).slice(2, 6)}`,
   team: args.team || "red",
   ui: args.ui || "native",

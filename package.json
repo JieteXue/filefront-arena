@@ -10,6 +10,7 @@
     "server": "node src/server/index.js",
     "client": "node src/client/index.js",
     "client:split": "node scripts/open-split-client.mjs",
+    "join": "node scripts/join-client.mjs",
     "test": "node --test"
   },
   "dependencies": {

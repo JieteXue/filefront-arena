@@ -2,10 +2,11 @@
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveServerUrl } from "../src/client/server-url.js";
 
 const args = parseArgs(process.argv.slice(2));
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const server = args.server || "http://localhost:31337";
+const server = resolveServerUrl(args);
 const name = args.name || "alice";
 const team = args.team || "red";
 
