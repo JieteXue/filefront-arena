@@ -3,11 +3,16 @@ import http from "node:http";
 import { Server } from "socket.io";
 import { runCommand } from "../game/engine.js";
 import { checkTimeLimit, createMatchState, joinMatch, leaveMatch, publicState } from "../game/state.js";
+import { applyArgOverrides, parseArgs, readLocalConfig } from "../config/local-config.js";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const args = parseArgs(process.argv.slice(2));
-const host = args.host || "0.0.0.0";
-const port = Number(args.port || 31337);
-const durationMinutes = Number(args.duration || 20);
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const config = applyArgOverrides(readLocalConfig(projectRoot), args);
+const host = args.host || config.server.host || "0.0.0.0";
+const port = Number(args.port || config.server.port || 31337);
+const durationMinutes = Number(args.duration || config.server.duration || 20);
 
 const match = createMatchState({ durationMinutes });
 const httpServer = http.createServer();
@@ -104,16 +109,3 @@ httpServer.listen(port, host, () => {
 });
 
 export { httpServer, io, match };
-
-function parseArgs(argv) {
-  const parsed = {};
-  for (let index = 0; index < argv.length; index += 1) {
-    const arg = argv[index];
-    if (arg.startsWith("--")) {
-      parsed[arg.slice(2)] = argv[index + 1] && !argv[index + 1].startsWith("--")
-        ? argv[++index]
-        : true;
-    }
-  }
-  return parsed;
-}

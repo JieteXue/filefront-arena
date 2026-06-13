@@ -1,7 +1,17 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
+import { createInterface } from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  DEFAULT_LOCAL_CONFIG,
+  LOCAL_CONFIG_FILE,
+  mergeConfig,
+  parseArgs,
+  readLocalConfig,
+  writeLocalConfig
+} from "../src/config/local-config.js";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const args = parseArgs(process.argv.slice(2));
@@ -10,6 +20,7 @@ printHeader();
 checkNodeVersion();
 checkCommand("npm", ["--version"], "npm is required. Install Node.js 20+ from https://nodejs.org/");
 installDependencies();
+const config = args["no-config"] ? mergeConfig(DEFAULT_LOCAL_CONFIG, readLocalConfig(projectRoot)) : await configureLocalSettings();
 printNextSteps();
 
 function printHeader() {
@@ -56,30 +67,70 @@ function installDependencies() {
   }
 }
 
+async function configureLocalSettings() {
+  const existing = mergeConfig(DEFAULT_LOCAL_CONFIG, readLocalConfig(projectRoot));
+  if (!input.isTTY || !output.isTTY || args.yes) {
+    const configPath = writeLocalConfig(projectRoot, existing);
+    console.log(`Local config ready: ${LOCAL_CONFIG_FILE}`);
+    return existing;
+  }
+
+  console.log("");
+  console.log(`Local config (${LOCAL_CONFIG_FILE})`);
+  console.log("Press Enter to keep the default shown in brackets.");
+
+  const rl = createInterface({ input, output });
+  try {
+    const next = mergeConfig(existing, {
+      server: {
+        host: await ask(rl, "Server listen host", existing.server.host),
+        port: Number(await ask(rl, "Server port", existing.server.port)),
+        duration: Number(await ask(rl, "Match duration minutes", existing.server.duration))
+      },
+      client: {
+        host: await ask(rl, "Default server host/IP for players", existing.client.host),
+        port: Number(await ask(rl, "Default server port for players", existing.client.port)),
+        name: await ask(rl, "Default player name", existing.client.name),
+        team: await askTeam(rl, existing.client.team),
+        mode: await askMode(rl, existing.client.mode)
+      }
+    });
+    const configPath = writeLocalConfig(projectRoot, next);
+    console.log(`Saved local config: ${configPath}`);
+    return next;
+  } finally {
+    rl.close();
+  }
+}
+
 function printNextSteps() {
   console.log("");
   console.log("Setup complete.");
   console.log("");
+  console.log(`Local config: ${LOCAL_CONFIG_FILE}`);
+  console.log("");
   console.log("Start a server:");
-  console.log("  npm run server -- --host 0.0.0.0 --port 31337 --duration 20");
+  console.log("  npm run server");
   console.log("");
   console.log("Join a match:");
-  console.log("  npm run join -- --host SERVER_LAN_IP --name alice --team red");
+  console.log("  npm run join");
   console.log("");
   console.log("Local test:");
   console.log("  npm run server -- --host 127.0.0.1 --port 31337 --duration 20");
   console.log("  npm run join -- --host localhost --name alice --team red");
 }
 
-function parseArgs(argv) {
-  const parsed = {};
-  for (let index = 0; index < argv.length; index += 1) {
-    const arg = argv[index];
-    if (arg.startsWith("--")) {
-      parsed[arg.slice(2)] = argv[index + 1] && !argv[index + 1].startsWith("--")
-        ? argv[++index]
-        : true;
-    }
-  }
-  return parsed;
+async function ask(rl, label, fallback) {
+  const answer = await rl.question(`${label} [${fallback}]: `);
+  return answer.trim() || fallback;
+}
+
+async function askTeam(rl, fallback) {
+  const answer = String(await ask(rl, "Default team red/blue", fallback)).toLowerCase();
+  return answer === "blue" ? "blue" : "red";
+}
+
+async function askMode(rl, fallback) {
+  const answer = String(await ask(rl, "Default client mode split/native/info/ops", fallback)).toLowerCase();
+  return ["split", "native", "info", "ops"].includes(answer) ? answer : "split";
 }

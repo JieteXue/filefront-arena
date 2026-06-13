@@ -75,7 +75,15 @@ bootstrap 会自动完成：
   - Windows：使用 winget 安装 Node.js LTS
 - 检查 npm 是否可用
 - 执行 `npm install`
+- 引导生成本地配置 `filefront.config.local.json`
 - 打印 server 和 join 的下一步命令
+
+`filefront.config.local.json` 只保存在本机，已加入 `.gitignore`，不会提交到 Git。它可以记录：
+
+- server 监听地址、端口、比赛时长
+- 默认连接的 server 地址和端口
+- 默认玩家名、队伍、客户端模式
+- 后续也可以继续扩展其他本地偏好
 
 如果已经有 Node.js，也可以直接运行：
 
@@ -92,13 +100,20 @@ npm run setup -- --ci
 初始化完成后，服务端运行：
 
 ```bash
-npm run server -- --host 0.0.0.0 --port 31337 --duration 20
+npm run server
 ```
 
 玩家加入：
 
 ```bash
+npm run join
+```
+
+临时覆盖本地配置也可以：
+
+```bash
 npm run join -- --host SERVER_LAN_IP --name alice --team red
+npm run server -- --host 0.0.0.0 --port 31337 --duration 20
 ```
 
 ## One-Line GitHub Run

@@ -4,12 +4,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveServerUrl } from "../src/client/server-url.js";
 import { buildClientCommands, toPosixCommand, toPowerShellCommand } from "../src/client/split-commands.js";
+import { applyArgOverrides, parseArgs, readLocalConfig } from "../src/config/local-config.js";
 
 const args = parseArgs(process.argv.slice(2));
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const server = resolveServerUrl(args);
-const name = args.name || "alice";
-const team = args.team || "red";
+const config = applyArgOverrides(readLocalConfig(projectRoot), args);
+const server = resolveServerUrl(config.client);
+const name = config.client.name || "alice";
+const team = config.client.team || "red";
 const commands = buildClientCommands({ projectRoot, server, name, team });
 
 try {
@@ -120,19 +122,6 @@ function findLinuxTerminal() {
     });
     return found.status === 0;
   });
-}
-
-function parseArgs(argv) {
-  const parsed = {};
-  for (let index = 0; index < argv.length; index += 1) {
-    const arg = argv[index];
-    if (arg.startsWith("--")) {
-      parsed[arg.slice(2)] = argv[index + 1] && !argv[index + 1].startsWith("--")
-        ? argv[++index]
-        : true;
-    }
-  }
-  return parsed;
 }
 
 function appleQuote(value) {
