@@ -4,6 +4,9 @@ import path from "node:path";
 export const LOCAL_CONFIG_FILE = "filefront.config.local.json";
 
 export const DEFAULT_LOCAL_CONFIG = {
+  network: {
+    subnet: "LAN_CIDR"
+  },
   server: {
     host: "0.0.0.0",
     port: 31337,
@@ -49,6 +52,10 @@ export function mergeConfig(base, override) {
   return {
     ...base,
     ...override,
+    network: {
+      ...(base.network || {}),
+      ...(override.network || {})
+    },
     server: {
       ...(base.server || {}),
       ...(override.server || {})
@@ -76,6 +83,7 @@ export function parseArgs(argv) {
 export function applyArgOverrides(config, args) {
   const next = mergeConfig(DEFAULT_LOCAL_CONFIG, config);
 
+  if (args.subnet) next.network.subnet = args.subnet;
   if (args["server-host"]) next.server.host = args["server-host"];
   if (args["server-port"]) next.server.port = Number(args["server-port"]);
   if (args.duration) next.server.duration = Number(args.duration);

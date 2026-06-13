@@ -82,6 +82,9 @@ async function configureLocalSettings() {
   const rl = createInterface({ input, output });
   try {
     const next = mergeConfig(existing, {
+      network: {
+        subnet: await askRequired(rl, "LAN subnet/CIDR", existing.network.subnet)
+      },
       server: {
         host: await ask(rl, "Server listen host", existing.server.host),
         port: Number(await ask(rl, "Server port", existing.server.port)),
@@ -123,6 +126,16 @@ function printNextSteps() {
 async function ask(rl, label, fallback) {
   const answer = await rl.question(`${label} [${fallback}]: `);
   return answer.trim() || fallback;
+}
+
+async function askRequired(rl, label, fallback) {
+  while (true) {
+    const answer = await ask(rl, label, fallback);
+    if (answer && answer !== "LAN_CIDR") {
+      return answer;
+    }
+    console.log("Please enter your local network range, for example the CIDR shown by your router or network settings.");
+  }
 }
 
 async function askTeam(rl, fallback) {
