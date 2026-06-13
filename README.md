@@ -6,14 +6,15 @@
 
 ## Requirements
 
-- Node.js 20 或更新版本。
+- 推荐使用下面的 bootstrap 脚本自动检查/安装 Node.js。
+- 如果手动安装，需要 Node.js 20 或更新版本。
 - npm/npx。正常安装 Node.js 后会自带 npm 和 npx。
 - 能访问 GitHub。`npx github:JieteXue/filefront-arena ...` 会从 GitHub 拉取项目。
 - 能访问 npm registry。第一次运行会自动安装 `socket.io` / `socket.io-client`。
 - 玩家可以用 `npx` 直接从 GitHub 启动，也可以 clone 本项目后本地运行。
 - 如果跨机器联机，server 所在机器需要允许其他电脑访问 `31337` 端口。
 
-检查环境：
+手动检查环境：
 
 ```bash
 node -v
@@ -49,20 +50,40 @@ sudo apt install nodejs npm
 
 推荐下载到本地运行，最稳定，也方便比赛当天所有人使用同一份命令。
 
+macOS / Linux：
+
 ```bash
 git clone https://github.com/JieteXue/filefront-arena.git
 cd filefront-arena
-npm run setup
+sh scripts/bootstrap-unix.sh
 ```
 
-`npm run setup` 会自动完成：
+Windows PowerShell：
+
+```powershell
+git clone https://github.com/JieteXue/filefront-arena.git
+cd filefront-arena
+powershell -ExecutionPolicy Bypass -File .\scripts\bootstrap-windows.ps1
+```
+
+bootstrap 会自动完成：
 
 - 检查 Node.js 版本是否满足 20+
+- 如果没有 Node.js，尝试安装：
+  - macOS：使用 Homebrew 安装
+  - Linux：使用系统包管理器安装
+  - Windows：使用 winget 安装 Node.js LTS
 - 检查 npm 是否可用
 - 执行 `npm install`
 - 打印 server 和 join 的下一步命令
 
-如果想严格按 `package-lock.json` 安装：
+如果已经有 Node.js，也可以直接运行：
+
+```bash
+npm run setup
+```
+
+严格按 `package-lock.json` 安装：
 
 ```bash
 npm run setup -- --ci

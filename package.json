@@ -13,6 +13,7 @@
     "join": "node scripts/join-client.mjs",
     "join:split": "node scripts/open-split-client.mjs",
     "setup": "node scripts/setup.mjs",
+    "bootstrap": "node scripts/setup.mjs",
     "test": "node --test"
   },
   "dependencies": {
