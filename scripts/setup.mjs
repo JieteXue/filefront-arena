@@ -79,38 +79,98 @@ async function configureLocalSettings() {
 
   console.log("");
   console.log(`Local config (${LOCAL_CONFIG_FILE})`);
-  console.log("Press Enter to keep the default shown in brackets.");
 
   const rl = createInterface({ input, output });
   try {
-    const serverEnabled = await askYesNo(rl, "Will this machine host the game server?", existing.server.enabled);
-    const serverConfig = serverEnabled
-      ? {
-          enabled: true,
-          host: await ask(rl, "Server listen host", existing.server.host),
-          port: Number(await ask(rl, "Server port", existing.server.port)),
-          duration: Number(await ask(rl, "Match duration minutes", existing.server.duration))
-        }
-      : {
-          ...existing.server,
-          enabled: false
-        };
+    const next = await editConfigMenu(rl, existing);
+    if (!next) {
+      return existing;
+    }
 
-    const next = mergeConfig(existing, {
-      server: serverConfig,
-      client: {
-        host: await ask(rl, "Default server host/IP for players", existing.client.host),
-        port: Number(await ask(rl, "Default server port for players", existing.client.port)),
-        name: await ask(rl, "Default player name", existing.client.name),
-        team: await askTeam(rl, existing.client.team),
-        mode: await askMode(rl, existing.client.mode)
-      }
-    });
     const configPath = writeLocalConfig(projectRoot, next);
     console.log(`Saved local config: ${configPath}`);
     return next;
   } finally {
     rl.close();
+  }
+}
+
+async function editConfigMenu(rl, initialConfig) {
+  let next = mergeConfig(DEFAULT_LOCAL_CONFIG, initialConfig);
+
+  while (true) {
+    printConfigMenu(next);
+    const choice = (await ask(rl, "Choose a number to edit, s to save, r to reset, q to quit", "s")).toLowerCase();
+
+    if (["", "s", "save"].includes(choice)) {
+      return next;
+    }
+
+    if (["q", "quit"].includes(choice)) {
+      console.log("Config unchanged.");
+      return null;
+    }
+
+    if (["r", "reset"].includes(choice)) {
+      next = mergeConfig(DEFAULT_LOCAL_CONFIG, {});
+      continue;
+    }
+
+    next = await editConfigField(rl, next, choice);
+  }
+}
+
+function printConfigMenu(config) {
+  console.log("");
+  console.log("Current config:");
+  console.log(`  1  Host game server: ${formatYesNo(config.server.enabled)}`);
+  console.log(`  2  Server listen host: ${config.server.host}`);
+  console.log(`  3  Server port: ${config.server.port}`);
+  console.log(`  4  Match duration minutes: ${config.server.duration}`);
+  console.log(`  5  Default server host/IP: ${config.client.host}`);
+  console.log(`  6  Default server port: ${config.client.port}`);
+  console.log(`  7  Default player name: ${config.client.name}`);
+  console.log(`  8  Default team: ${config.client.team}`);
+  console.log(`  9  Default client mode: ${config.client.mode}`);
+  console.log("");
+  console.log("Enter a number to edit one setting, or s/r/q.");
+}
+
+async function editConfigField(rl, config, choice) {
+  const next = mergeConfig(config, {});
+
+  switch (choice) {
+    case "1":
+      next.server.enabled = await askYesNo(rl, "Will this machine host the game server?", next.server.enabled);
+      return next;
+    case "2":
+      next.server.host = await ask(rl, "Server listen host", next.server.host);
+      return next;
+    case "3":
+      next.server.port = await askNumber(rl, "Server port", next.server.port);
+      next.client.port = next.client.port || next.server.port;
+      return next;
+    case "4":
+      next.server.duration = await askNumber(rl, "Match duration minutes", next.server.duration);
+      return next;
+    case "5":
+      next.client.host = await ask(rl, "Default server host/IP for players", next.client.host);
+      return next;
+    case "6":
+      next.client.port = await askNumber(rl, "Default server port for players", next.client.port);
+      return next;
+    case "7":
+      next.client.name = await ask(rl, "Default player name", next.client.name);
+      return next;
+    case "8":
+      next.client.team = await askTeam(rl, next.client.team);
+      return next;
+    case "9":
+      next.client.mode = await askMode(rl, next.client.mode);
+      return next;
+    default:
+      console.log(`Unknown choice: ${choice}`);
+      return next;
   }
 }
 
@@ -134,18 +194,46 @@ async function ask(rl, label, fallback) {
   return answer.trim() || fallback;
 }
 
+async function askNumber(rl, label, fallback) {
+  const value = Number(await ask(rl, label, fallback));
+  if (Number.isFinite(value) && value > 0) {
+    return value;
+  }
+
+  console.log(`Keeping ${fallback}; expected a positive number.`);
+  return fallback;
+}
+
 async function askYesNo(rl, label, fallback) {
   const fallbackText = fallback ? "yes" : "no";
   const answer = String(await ask(rl, `${label} yes/no`, fallbackText)).toLowerCase();
-  return ["y", "yes", "true", "1"].includes(answer);
+  if (["y", "yes", "true", "1"].includes(answer)) {
+    return true;
+  }
+  if (["n", "no", "false", "0"].includes(answer)) {
+    return false;
+  }
+  return fallback;
 }
 
 async function askTeam(rl, fallback) {
   const answer = String(await ask(rl, "Default team red/blue", fallback)).toLowerCase();
-  return answer === "blue" ? "blue" : "red";
+  if (["red", "blue"].includes(answer)) {
+    return answer;
+  }
+  console.log(`Keeping ${fallback}; expected red or blue.`);
+  return fallback;
 }
 
 async function askMode(rl, fallback) {
   const answer = String(await ask(rl, "Default client mode split/native/info/ops", fallback)).toLowerCase();
-  return ["split", "native", "info", "ops"].includes(answer) ? answer : "split";
+  if (["split", "native", "info", "ops"].includes(answer)) {
+    return answer;
+  }
+  console.log(`Keeping ${fallback}; expected split, native, info, or ops.`);
+  return fallback;
+}
+
+function formatYesNo(value) {
+  return value ? "yes" : "no";
 }
