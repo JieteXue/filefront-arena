@@ -12,13 +12,15 @@ import {
   readLocalConfig,
   writeLocalConfig
 } from "../src/config/local-config.js";
+import { npmCommand } from "../src/npm-command.js";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const args = parseArgs(process.argv.slice(2));
+const npm = npmCommand();
 
 printHeader();
 checkNodeVersion();
-checkCommand("npm", ["--version"], "npm is required. Install Node.js 20+ from https://nodejs.org/");
+checkCommand(npm, ["--version"], "npm is required. Install Node.js 20+ from https://nodejs.org/", "npm");
 installDependencies();
 const config = args["no-config"] ? mergeConfig(DEFAULT_LOCAL_CONFIG, readLocalConfig(projectRoot)) : await configureLocalSettings();
 printNextSteps();
@@ -38,7 +40,7 @@ function checkNodeVersion() {
   console.log(`OK Node.js ${process.version}`);
 }
 
-function checkCommand(command, commandArgs, errorMessage) {
+function checkCommand(command, commandArgs, errorMessage, displayName = command) {
   const result = spawnSync(command, commandArgs, {
     cwd: projectRoot,
     encoding: "utf8"
@@ -49,14 +51,14 @@ function checkCommand(command, commandArgs, errorMessage) {
     process.exit(1);
   }
 
-  console.log(`OK ${command} ${String(result.stdout).trim()}`);
+  console.log(`OK ${displayName} ${String(result.stdout).trim()}`);
 }
 
 function installDependencies() {
   console.log("");
   console.log("Installing dependencies...");
   const commandArgs = args.ci ? ["ci"] : ["install"];
-  const result = spawnSync("npm", commandArgs, {
+  const result = spawnSync(npm, commandArgs, {
     cwd: projectRoot,
     stdio: "inherit"
   });

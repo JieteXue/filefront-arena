@@ -2,6 +2,7 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { npmCommand } from "./npm-command.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const [command = "help", ...args] = process.argv.slice(2);
@@ -20,7 +21,7 @@ if (command === "help" || command === "--help" || command === "-h") {
 }
 
 if (command === "update") {
-  const child = spawn("npm", ["install", "-g", "github:JieteXue/filefront-arena"], {
+  const child = spawn(npmCommand(), ["install", "-g", "github:JieteXue/filefront-arena"], {
     stdio: "inherit"
   });
 
