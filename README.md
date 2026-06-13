@@ -14,6 +14,14 @@ npm install -g github:JieteXue/filefront-arena
 
 需要 Node.js 20+。正常安装 Node.js 后会自带 `npm`。
 
+以后更新也用同一个包位置，不会堆多个副本：
+
+```bash
+filefront update
+```
+
+本地配置 `filefront.config.local.json` 不会被更新覆盖。
+
 ## Setup
 
 第一次运行：

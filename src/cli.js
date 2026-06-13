@@ -19,26 +19,41 @@ if (command === "help" || command === "--help" || command === "-h") {
   process.exit(0);
 }
 
-const target = targets[command];
-if (!target) {
-  console.error(`Unknown command: ${command}`);
-  printHelp();
-  process.exit(1);
+if (command === "update") {
+  const child = spawn("npm", ["install", "-g", "github:JieteXue/filefront-arena"], {
+    stdio: "inherit"
+  });
+
+  child.on("exit", (code, signal) => {
+    if (signal) process.kill(process.pid, signal);
+    process.exit(code ?? 0);
+  });
+} else {
+  runTarget(command, args);
 }
 
-const child = spawn(process.execPath, [path.join(root, target[0]), ...target[1]], {
-  stdio: "inherit",
-  cwd: root,
-  env: {
-    ...process.env,
-    FILEFRONT_CONFIG_DIR: process.cwd()
+function runTarget(commandName, commandArgs) {
+  const target = targets[commandName];
+  if (!target) {
+    console.error(`Unknown command: ${commandName}`);
+    printHelp();
+    process.exit(1);
   }
-});
 
-child.on("exit", (code, signal) => {
-  if (signal) process.kill(process.pid, signal);
-  process.exit(code ?? 0);
-});
+  const child = spawn(process.execPath, [path.join(root, target[0]), ...commandArgs], {
+    stdio: "inherit",
+    cwd: root,
+    env: {
+      ...process.env,
+      FILEFRONT_CONFIG_DIR: process.cwd()
+    }
+  });
+
+  child.on("exit", (code, signal) => {
+    if (signal) process.kill(process.pid, signal);
+    process.exit(code ?? 0);
+  });
+}
 
 function printHelp() {
   console.log(`filefront-arena
@@ -47,10 +62,12 @@ Usage:
   filefront setup
   filefront server
   filefront join
+  filefront update
 
 Commands:
   setup    Create local config and install dependencies
   server   Start the match server
   join     Join using local config
+  update   Reinstall the global package from GitHub
 `);
 }
