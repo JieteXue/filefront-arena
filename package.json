@@ -6,6 +6,11 @@
   "bin": {
     "filefront": "src/cli.js"
   },
+  "files": [
+    "README.md",
+    "scripts/",
+    "src/"
+  ],
   "scripts": {
     "server": "node src/server/index.js",
     "client": "node src/client/index.js",
