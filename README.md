@@ -71,6 +71,19 @@ filefront split --server http://SERVER_IP:31337 --name alice --team red
 npx -y github:JieteXue/filefront-arena client --server http://SERVER_IP:31337 --name alice --team red
 ```
 
+`SERVER_IP` 必须手动替换：
+
+- 和 server 在同一台电脑：用 `localhost`
+- 连接局域网里的另一台 server：用服务端机器的局域网 IP，例如 `192.168.1.23`
+- 连接云服务器：用云服务器公网 IP 或域名
+
+例子：
+
+```bash
+npx -y github:JieteXue/filefront-arena#v0.1.1 client --server http://localhost:31337 --name alice --team red
+npx -y github:JieteXue/filefront-arena#v0.1.1 client --server http://192.168.1.23:31337 --name alice --team red
+```
+
 安装依赖：
 
 ```bash
