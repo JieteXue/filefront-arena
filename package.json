@@ -1,0 +1,23 @@
+{
+  "name": "filefront-arena",
+  "version": "0.1.0",
+  "description": "A real-time multiplayer CLI file attack-and-defense arena.",
+  "type": "module",
+  "bin": {
+    "filefront": "src/cli.js"
+  },
+  "scripts": {
+    "server": "node src/server/index.js",
+    "client": "node src/client/index.js",
+    "client:split": "node scripts/open-split-client.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=20"
+  }
+}
