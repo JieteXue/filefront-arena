@@ -7,8 +7,43 @@
 ## Requirements
 
 - Node.js 20 或更新版本。
+- npm/npx。正常安装 Node.js 后会自带 npm 和 npx。
+- 能访问 GitHub。`npx github:JieteXue/filefront-arena ...` 会从 GitHub 拉取项目。
+- 能访问 npm registry。第一次运行会自动安装 `socket.io` / `socket.io-client`。
 - 玩家可以用 `npx` 直接从 GitHub 启动，也可以 clone 本项目后本地运行。
 - 如果跨机器联机，server 所在机器需要允许其他电脑访问 `31337` 端口。
+
+检查环境：
+
+```bash
+node -v
+npm -v
+npx -v
+```
+
+如果 `node -v` 低于 20，建议升级 Node.js。
+
+安装 Node.js：
+
+macOS Homebrew：
+
+```bash
+brew install node
+```
+
+Windows：
+
+- 推荐安装 Node.js LTS：https://nodejs.org/
+- 安装后重新打开 PowerShell 或 Windows Terminal。
+
+Ubuntu/Debian：
+
+```bash
+sudo apt update
+sudo apt install nodejs npm
+```
+
+系统源里的 Node.js 可能偏旧；如果版本低于 20，建议使用 nvm 或 NodeSource 安装新版 Node.js。
 
 ## One-Line Install
 
@@ -41,18 +76,6 @@ npx -y github:JieteXue/filefront-arena client --server http://SERVER_IP:31337 --
 ```bash
 cd /path/to/filefront-arena
 npm install
-```
-
-不想 clone 的玩家可以直接使用 GitHub 一行命令：
-
-```bash
-npx github:JieteXue/filefront-arena client --server http://SERVER_IP:31337 --name alice --team red
-```
-
-macOS 三窗口客户端：
-
-```bash
-npx github:JieteXue/filefront-arena split --server http://SERVER_IP:31337 --name alice --team red
 ```
 
 ## Server
