@@ -18,8 +18,12 @@ export const DEFAULT_LOCAL_CONFIG = {
   }
 };
 
+export function resolveConfigRoot(projectRoot) {
+  return process.env.FILEFRONT_CONFIG_DIR || projectRoot;
+}
+
 export function localConfigPath(projectRoot) {
-  return path.join(projectRoot, LOCAL_CONFIG_FILE);
+  return path.join(resolveConfigRoot(projectRoot), LOCAL_CONFIG_FILE);
 }
 
 export function readLocalConfig(projectRoot) {

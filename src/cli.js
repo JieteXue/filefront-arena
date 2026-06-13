@@ -10,7 +10,8 @@ const targets = {
   server: ["src/server/index.js", args],
   client: ["src/client/index.js", args],
   split: ["scripts/open-split-client.mjs", args],
-  join: ["scripts/join-client.mjs", args]
+  join: ["scripts/join-client.mjs", args],
+  setup: ["scripts/setup.mjs", args]
 };
 
 if (command === "help" || command === "--help" || command === "-h") {
@@ -27,7 +28,11 @@ if (!target) {
 
 const child = spawn(process.execPath, [path.join(root, target[0]), ...target[1]], {
   stdio: "inherit",
-  cwd: root
+  cwd: root,
+  env: {
+    ...process.env,
+    FILEFRONT_CONFIG_DIR: process.cwd()
+  }
 });
 
 child.on("exit", (code, signal) => {
@@ -39,15 +44,13 @@ function printHelp() {
   console.log(`filefront-arena
 
 Usage:
-  filefront server --host 0.0.0.0 --port 31337 --duration 20
-  filefront client --server http://localhost:31337 --name alice --team red
-  filefront split  --host localhost --name alice --team red
-  filefront join   --host localhost --name alice --team red
+  filefront setup
+  filefront server
+  filefront join
 
 Commands:
+  setup    Create local config and install dependencies
   server   Start the match server
-  client   Start one client window
-  split    Open OP, INFO, and OPS terminal windows when supported
-  join     Join by host; opens split windows by default
+  join     Join using local config
 `);
 }

@@ -52,3 +52,20 @@ test("arg overrides keep config defaults but prefer explicit command args", () =
   assert.equal(merged.server.port, 6000);
   assert.equal(merged.server.duration, 30);
 });
+
+test("FILEFRONT_CONFIG_DIR can move local config outside the package", () => {
+  const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), "filefront-package-"));
+  const configRoot = fs.mkdtempSync(path.join(os.tmpdir(), "filefront-user-"));
+  const previous = process.env.FILEFRONT_CONFIG_DIR;
+  process.env.FILEFRONT_CONFIG_DIR = configRoot;
+
+  try {
+    assert.equal(localConfigPath(projectRoot), path.join(configRoot, LOCAL_CONFIG_FILE));
+  } finally {
+    if (previous === undefined) {
+      delete process.env.FILEFRONT_CONFIG_DIR;
+    } else {
+      process.env.FILEFRONT_CONFIG_DIR = previous;
+    }
+  }
+});
