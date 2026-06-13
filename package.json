@@ -1,6 +1,6 @@
 {
   "name": "filefront-arena",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A real-time multiplayer CLI file attack-and-defense arena.",
   "type": "module",
   "bin": {

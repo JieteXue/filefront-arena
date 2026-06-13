@@ -58,9 +58,9 @@ export function runNativeClient(socket, options) {
 
   output.write(setTerminalTitle(`OP ${options.team.toUpperCase()} ${options.name}`));
   for (const line of banner({ role: "OP", team: options.team, name: options.name })) {
-    print(line);
+    output.write(`${line}\n`);
   }
-  print(`${ANSI.dim}type help for commands, quit to exit client${ANSI.reset}`);
+  output.write(`${ANSI.dim}type help for commands, quit to exit client${ANSI.reset}\n`);
   rl.prompt();
 
   function renderState(state) {
