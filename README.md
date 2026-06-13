@@ -45,7 +45,42 @@ sudo apt install nodejs npm
 
 系统源里的 Node.js 可能偏旧；如果版本低于 20，建议使用 nvm 或 NodeSource 安装新版 Node.js。
 
-## One-Line Install
+## Recommended Local Setup
+
+推荐下载到本地运行，最稳定，也方便比赛当天所有人使用同一份命令。
+
+```bash
+git clone https://github.com/JieteXue/filefront-arena.git
+cd filefront-arena
+npm run setup
+```
+
+`npm run setup` 会自动完成：
+
+- 检查 Node.js 版本是否满足 20+
+- 检查 npm 是否可用
+- 执行 `npm install`
+- 打印 server 和 join 的下一步命令
+
+如果想严格按 `package-lock.json` 安装：
+
+```bash
+npm run setup -- --ci
+```
+
+初始化完成后，服务端运行：
+
+```bash
+npm run server -- --host 0.0.0.0 --port 31337 --duration 20
+```
+
+玩家加入：
+
+```bash
+npm run join -- --host SERVER_LAN_IP --name alice --team red
+```
+
+## One-Line GitHub Run
 
 全局安装一次，以后直接使用 `filefront` 命令：
 
