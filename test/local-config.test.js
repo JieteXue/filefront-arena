@@ -19,12 +19,12 @@ test("local config path and read/write stay project local", () => {
   assert.deepEqual(readLocalConfig(projectRoot), {});
 
   const config = mergeConfig(DEFAULT_LOCAL_CONFIG, {
-    network: { subnet: "test-lan-cidr" },
+    server: { enabled: true },
     client: { host: "arena.local", name: "alice", team: "blue" }
   });
   writeLocalConfig(projectRoot, config);
 
-  assert.equal(readLocalConfig(projectRoot).network.subnet, "test-lan-cidr");
+  assert.equal(readLocalConfig(projectRoot).server.enabled, true);
   assert.equal(readLocalConfig(projectRoot).client.host, "arena.local");
   assert.equal(readLocalConfig(projectRoot).client.team, "blue");
 });
@@ -41,12 +41,12 @@ test("arg overrides keep config defaults but prefer explicit command args", () =
     name: "cli-name",
     team: "blue",
     mode: "native",
-    subnet: "cli-lan-cidr",
+    "server-enabled": "true",
     "server-port": "6000",
     duration: "30"
   });
 
-  assert.equal(merged.network.subnet, "cli-lan-cidr");
+  assert.equal(merged.server.enabled, true);
   assert.equal(merged.client.host, "cli-host");
   assert.equal(merged.client.port, 5000);
   assert.equal(merged.client.name, "cli-name");
@@ -72,4 +72,21 @@ test("FILEFRONT_CONFIG_DIR can move local config outside the package", () => {
       process.env.FILEFRONT_CONFIG_DIR = previous;
     }
   }
+});
+
+test("obsolete network config is removed when merging or writing", () => {
+  const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), "filefront-obsolete-"));
+  const merged = mergeConfig(DEFAULT_LOCAL_CONFIG, {
+    network: { subnet: "obsolete" },
+    client: { host: "arena.local" }
+  });
+
+  assert.equal("network" in merged, false);
+
+  writeLocalConfig(projectRoot, {
+    ...merged,
+    network: { subnet: "obsolete" }
+  });
+
+  assert.equal("network" in readLocalConfig(projectRoot), false);
 });

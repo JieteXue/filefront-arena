@@ -81,15 +81,21 @@ async function configureLocalSettings() {
 
   const rl = createInterface({ input, output });
   try {
+    const serverEnabled = await askYesNo(rl, "Will this machine host the game server?", existing.server.enabled);
+    const serverConfig = serverEnabled
+      ? {
+          enabled: true,
+          host: await ask(rl, "Server listen host", existing.server.host),
+          port: Number(await ask(rl, "Server port", existing.server.port)),
+          duration: Number(await ask(rl, "Match duration minutes", existing.server.duration))
+        }
+      : {
+          ...existing.server,
+          enabled: false
+        };
+
     const next = mergeConfig(existing, {
-      network: {
-        subnet: await askRequired(rl, "LAN subnet/CIDR", existing.network.subnet)
-      },
-      server: {
-        host: await ask(rl, "Server listen host", existing.server.host),
-        port: Number(await ask(rl, "Server port", existing.server.port)),
-        duration: Number(await ask(rl, "Match duration minutes", existing.server.duration))
-      },
+      server: serverConfig,
       client: {
         host: await ask(rl, "Default server host/IP for players", existing.client.host),
         port: Number(await ask(rl, "Default server port for players", existing.client.port)),
@@ -112,15 +118,13 @@ function printNextSteps() {
   console.log("");
   console.log(`Local config: ${LOCAL_CONFIG_FILE}`);
   console.log("");
-  console.log("Start a server:");
-  console.log("  npm run server");
-  console.log("");
+  if (config.server.enabled) {
+    console.log("Start a server:");
+    console.log("  npm run server");
+    console.log("");
+  }
   console.log("Join a match:");
   console.log("  npm run join");
-  console.log("");
-  console.log("Local test:");
-  console.log("  npm run server -- --host 127.0.0.1 --port 31337 --duration 20");
-  console.log("  npm run join -- --host localhost --name alice --team red");
 }
 
 async function ask(rl, label, fallback) {
@@ -128,14 +132,10 @@ async function ask(rl, label, fallback) {
   return answer.trim() || fallback;
 }
 
-async function askRequired(rl, label, fallback) {
-  while (true) {
-    const answer = await ask(rl, label, fallback);
-    if (answer && answer !== "LAN_CIDR") {
-      return answer;
-    }
-    console.log("Please enter your local network range, for example the CIDR shown by your router or network settings.");
-  }
+async function askYesNo(rl, label, fallback) {
+  const fallbackText = fallback ? "yes" : "no";
+  const answer = String(await ask(rl, `${label} yes/no`, fallbackText)).toLowerCase();
+  return ["y", "yes", "true", "1"].includes(answer);
 }
 
 async function askTeam(rl, fallback) {

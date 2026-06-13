@@ -4,10 +4,8 @@ import path from "node:path";
 export const LOCAL_CONFIG_FILE = "filefront.config.local.json";
 
 export const DEFAULT_LOCAL_CONFIG = {
-  network: {
-    subnet: "LAN_CIDR"
-  },
   server: {
+    enabled: false,
     host: "0.0.0.0",
     port: 31337,
     duration: 20
@@ -44,18 +42,14 @@ export function readLocalConfig(projectRoot) {
 
 export function writeLocalConfig(projectRoot, config) {
   const configPath = localConfigPath(projectRoot);
-  fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
+  fs.writeFileSync(configPath, `${JSON.stringify(dropObsoleteConfig(config), null, 2)}\n`, "utf8");
   return configPath;
 }
 
 export function mergeConfig(base, override) {
-  return {
+  return dropObsoleteConfig({
     ...base,
     ...override,
-    network: {
-      ...(base.network || {}),
-      ...(override.network || {})
-    },
     server: {
       ...(base.server || {}),
       ...(override.server || {})
@@ -64,7 +58,7 @@ export function mergeConfig(base, override) {
       ...(base.client || {}),
       ...(override.client || {})
     }
-  };
+  });
 }
 
 export function parseArgs(argv) {
@@ -83,7 +77,7 @@ export function parseArgs(argv) {
 export function applyArgOverrides(config, args) {
   const next = mergeConfig(DEFAULT_LOCAL_CONFIG, config);
 
-  if (args.subnet) next.network.subnet = args.subnet;
+  if (args["server-enabled"]) next.server.enabled = args["server-enabled"] === true || args["server-enabled"] === "true";
   if (args["server-host"]) next.server.host = args["server-host"];
   if (args["server-port"]) next.server.port = Number(args["server-port"]);
   if (args.duration) next.server.duration = Number(args.duration);
@@ -96,4 +90,9 @@ export function applyArgOverrides(config, args) {
   if (args.mode || args.ui) next.client.mode = args.mode || args.ui;
 
   return next;
+}
+
+function dropObsoleteConfig(config) {
+  const { network, ...rest } = config || {};
+  return rest;
 }

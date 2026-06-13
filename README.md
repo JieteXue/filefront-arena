@@ -36,9 +36,9 @@ filefront setup
 filefront.config.local.json
 ```
 
-引导过程中会要求输入你的局域网网段。
+引导会先询问这台机器是否需要作为服务器。普通玩家不需要配置服务器。
 
-这个文件只保存在你运行命令的目录，已经加入 `.gitignore`，不要提交。它会记录局域网网段、server 端口、比赛时长、默认连接地址、玩家名、队伍和窗口模式。
+这个文件只保存在你运行命令的目录，已经加入 `.gitignore`，不要提交。它会记录默认连接地址、玩家名、队伍、窗口模式，以及可选的服务器配置。
 
 ## Start Server
 
@@ -70,10 +70,8 @@ filefront join
 
 ```json
 {
-  "network": {
-    "subnet": "LAN_CIDR"
-  },
   "server": {
+    "enabled": false,
     "host": "0.0.0.0",
     "port": 31337,
     "duration": 20
@@ -87,8 +85,6 @@ filefront join
   }
 }
 ```
-
-`LAN_CIDR` 填你自己的局域网网段。
 
 `SERVER_LAN_IP` 换成服务端机器的局域网 IP、云服务器公网 IP 或域名。同一台电脑测试用 `localhost`。
 
