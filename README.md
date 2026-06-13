@@ -30,13 +30,13 @@ filefront update
 filefront setup
 ```
 
-它会打开配置菜单并生成本地配置：
+它会生成本地配置：
 
 ```text
 filefront.config.local.json
 ```
 
-输入编号只修改对应设置，直接输入 `s` 保存。普通玩家通常只需要改默认 server 地址、玩家名和队伍。
+首次运行会先提示填写 `Default server host/IP`。`Host game server` 默认是 `no`；普通玩家不需要开启服务器。随后会打开配置菜单，输入编号只修改对应设置，直接输入 `s` 保存。
 
 这个文件只保存在你运行命令的目录，已经加入 `.gitignore`，不要提交。它会记录默认连接地址、玩家名、队伍、窗口模式，以及可选的服务器配置。
 

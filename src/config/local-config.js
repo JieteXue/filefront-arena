@@ -42,6 +42,7 @@ export function readLocalConfig(projectRoot) {
 
 export function writeLocalConfig(projectRoot, config) {
   const configPath = localConfigPath(projectRoot);
+  fs.mkdirSync(path.dirname(configPath), { recursive: true });
   fs.writeFileSync(configPath, `${JSON.stringify(dropObsoleteConfig(config), null, 2)}\n`, "utf8");
   return configPath;
 }

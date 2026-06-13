@@ -74,6 +74,24 @@ test("FILEFRONT_CONFIG_DIR can move local config outside the package", () => {
   }
 });
 
+test("writeLocalConfig creates FILEFRONT_CONFIG_DIR when needed", () => {
+  const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), "filefront-package-"));
+  const configRoot = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "filefront-parent-")), "nested");
+  const previous = process.env.FILEFRONT_CONFIG_DIR;
+  process.env.FILEFRONT_CONFIG_DIR = configRoot;
+
+  try {
+    writeLocalConfig(projectRoot, DEFAULT_LOCAL_CONFIG);
+    assert.equal(fs.existsSync(path.join(configRoot, LOCAL_CONFIG_FILE)), true);
+  } finally {
+    if (previous === undefined) {
+      delete process.env.FILEFRONT_CONFIG_DIR;
+    } else {
+      process.env.FILEFRONT_CONFIG_DIR = previous;
+    }
+  }
+});
+
 test("obsolete network config is removed when merging or writing", () => {
   const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), "filefront-obsolete-"));
   const merged = mergeConfig(DEFAULT_LOCAL_CONFIG, {

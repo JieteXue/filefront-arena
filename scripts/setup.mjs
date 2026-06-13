@@ -2,11 +2,13 @@
 import { spawnSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   DEFAULT_LOCAL_CONFIG,
   LOCAL_CONFIG_FILE,
+  localConfigPath,
   mergeConfig,
   parseArgs,
   readLocalConfig,
@@ -70,6 +72,7 @@ function installDependencies() {
 }
 
 async function configureLocalSettings() {
+  const isFirstSetup = !fs.existsSync(localConfigPath(projectRoot));
   const existing = mergeConfig(DEFAULT_LOCAL_CONFIG, readLocalConfig(projectRoot));
   if (!input.isTTY || !output.isTTY || args.yes) {
     const configPath = writeLocalConfig(projectRoot, existing);
@@ -82,7 +85,8 @@ async function configureLocalSettings() {
 
   const rl = createInterface({ input, output });
   try {
-    const next = await editConfigMenu(rl, existing);
+    const startingConfig = isFirstSetup ? await askFirstSetupConfig(rl, existing) : existing;
+    const next = await editConfigMenu(rl, startingConfig);
     if (!next) {
       return existing;
     }
@@ -93,6 +97,17 @@ async function configureLocalSettings() {
   } finally {
     rl.close();
   }
+}
+
+async function askFirstSetupConfig(rl, config) {
+  console.log("First-time setup");
+  const next = mergeConfig(config, {
+    server: { enabled: false },
+    client: {
+      host: await ask(rl, "Default server host/IP for players", config.client.host)
+    }
+  });
+  return next;
 }
 
 async function editConfigMenu(rl, initialConfig) {
