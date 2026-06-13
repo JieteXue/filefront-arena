@@ -211,13 +211,18 @@ async function selectOption(title, options) {
       output.write(`\x1b[${renderedLines}A\x1b[J`);
     }
 
-    const lines = [`${title}:`, "Use Up/Down arrows, Enter to select."];
-    for (let index = 0; index < options.length; index += 1) {
-      const option = options[index];
-      const cursor = index === selected ? ">" : " ";
+    const renderedOptions = options.map((option, index) => {
       const detail = option.detail === "" || option.detail === undefined ? "" : `  ${option.detail}`;
-      lines.push(`${cursor} ${option.label}${detail}`);
+      const text = `${option.label}${detail}`;
+      return index === selected ? highlight(`> ${text}`) : `  ${text}`;
+    });
+    const width = Math.max(title.length, "Use Up/Down arrows, Enter to select.".length, ...stripAnsi(renderedOptions).map((line) => line.length));
+    const border = `+${"-".repeat(width + 2)}+`;
+    const lines = [title, "Use Up/Down arrows, Enter to select.", "", border];
+    for (let index = 0; index < options.length; index += 1) {
+      lines.push(`| ${padAnsi(renderedOptions[index], width)} |`);
     }
+    lines.push(border);
     output.write(`${lines.join("\n")}\n`);
     renderedLines = lines.length;
   };
@@ -272,7 +277,7 @@ async function ask(rl, label, fallback) {
     const answer = await rl.question(`${label} [${fallback}]: `);
     return answer.trim() || fallback;
   } catch (error) {
-    if (error.code === "ERR_USE_AFTER_CLOSE") {
+    if (error.code === "ERR_USE_AFTER_CLOSE" || error.code === "ABORT_ERR") {
       return fallback;
     }
     throw error;
@@ -321,4 +326,17 @@ async function askMode(rl, fallback) {
 
 function formatYesNo(value) {
   return value ? "yes" : "no";
+}
+
+function highlight(value) {
+  return `\x1b[7m${value}\x1b[0m`;
+}
+
+function stripAnsi(values) {
+  return values.map((value) => value.replace(/\x1b\[[0-9;]*m/g, ""));
+}
+
+function padAnsi(value, width) {
+  const visible = value.replace(/\x1b\[[0-9;]*m/g, "");
+  return value + " ".repeat(Math.max(0, width - visible.length));
 }
