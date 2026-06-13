@@ -12,6 +12,7 @@ const targets = {
   client: ["src/client/index.js", args],
   split: ["scripts/open-split-client.mjs", args],
   join: ["scripts/join-client.mjs", args],
+  config: ["scripts/config.mjs", args],
   setup: ["scripts/setup.mjs", args]
 };
 
@@ -61,12 +62,14 @@ function printHelp() {
 
 Usage:
   filefront setup
+  filefront config
   filefront server
   filefront join
   filefront update
 
 Commands:
   setup    Create local config and install dependencies
+  config   Edit local config only
   server   Start the match server
   join     Join using local config
   update   Reinstall the global package from GitHub

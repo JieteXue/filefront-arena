@@ -36,7 +36,15 @@ filefront setup
 filefront.config.local.json
 ```
 
-首次运行会先提示填写 `Default server host/IP`。`Host game server` 默认是 `no`；普通玩家不需要开启服务器。随后会打开配置菜单，输入编号只修改对应设置，直接输入 `s` 保存。
+首次运行会先提示填写 `Default server host/IP`。`Host game server` 默认是 `no`；普通玩家不需要开启服务器。
+
+只修改本地配置时运行：
+
+```bash
+filefront config
+```
+
+它不会安装依赖，只会打开配置菜单。输入编号只修改对应设置，直接输入 `s` 保存。
 
 这个文件只保存在你运行命令的目录，已经加入 `.gitignore`，不要提交。它会记录默认连接地址、玩家名、队伍、窗口模式，以及可选的服务器配置。
 

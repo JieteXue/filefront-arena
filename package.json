@@ -17,6 +17,7 @@
     "client:split": "node scripts/open-split-client.mjs",
     "join": "node scripts/join-client.mjs",
     "join:split": "node scripts/open-split-client.mjs",
+    "config": "node scripts/config.mjs",
     "setup": "node scripts/setup.mjs",
     "bootstrap": "node scripts/setup.mjs",
     "test": "node --test"
