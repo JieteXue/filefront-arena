@@ -75,7 +75,7 @@ function printNextSteps() {
   console.log("");
   console.log(`Local config: ${LOCAL_CONFIG_FILE}`);
   console.log("");
-  if (config.server.enabled) {
+  if (config.network.server.enabled) {
     console.log("Start a server:");
     console.log("  npm run server");
     console.log("");

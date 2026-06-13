@@ -10,10 +10,10 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "
 const localConfig = readLocalConfig(projectRoot);
 const mergedConfig = applyArgOverrides(localConfig, args);
 const answers = mergedConfig;
-const server = resolveServerUrl(answers.client);
-const name = answers.client.name || "alice";
-const team = answers.client.team || "red";
-const mode = answers.client.mode || "split";
+const server = resolveServerUrl(answers.network.client);
+const name = answers.game.name || "alice";
+const team = answers.game.team || "red";
+const mode = answers.game.mode || "split";
 
 if (mode === "split") {
   runNode(["scripts/open-split-client.mjs", "--server", server, "--name", name, "--team", team]);

@@ -9,9 +9,9 @@ import { applyArgOverrides, parseArgs, readLocalConfig } from "../src/config/loc
 const args = parseArgs(process.argv.slice(2));
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const config = applyArgOverrides(readLocalConfig(projectRoot), args);
-const server = resolveServerUrl(config.client);
-const name = config.client.name || "alice";
-const team = config.client.team || "red";
+const server = resolveServerUrl(config.network.client);
+const name = config.game.name || "alice";
+const team = config.game.team || "red";
 const commands = buildClientCommands({ projectRoot, server, name, team });
 
 try {

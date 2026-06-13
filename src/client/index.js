@@ -11,9 +11,9 @@ const args = parseArgs(process.argv.slice(2));
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const config = applyArgOverrides(readLocalConfig(projectRoot), args);
 const options = {
-  serverUrl: resolveServerUrl(config.client),
-  name: config.client.name || `op-${Math.random().toString(36).slice(2, 6)}`,
-  team: config.client.team || "red",
+  serverUrl: resolveServerUrl(config.network.client),
+  name: config.game.name || `op-${Math.random().toString(36).slice(2, 6)}`,
+  team: config.game.team || "red",
   ui: args.ui || "native",
   watch: Boolean(args.watch),
   ops: Boolean(args.ops)

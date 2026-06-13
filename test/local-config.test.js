@@ -24,9 +24,9 @@ test("local config path and read/write stay project local", () => {
   });
   writeLocalConfig(projectRoot, config);
 
-  assert.equal(readLocalConfig(projectRoot).server.enabled, true);
-  assert.equal(readLocalConfig(projectRoot).client.host, "arena.local");
-  assert.equal(readLocalConfig(projectRoot).client.team, "blue");
+  assert.equal(readLocalConfig(projectRoot).network.server.enabled, true);
+  assert.equal(readLocalConfig(projectRoot).network.client.host, "arena.local");
+  assert.equal(readLocalConfig(projectRoot).game.team, "blue");
 });
 
 test("arg overrides keep config defaults but prefer explicit command args", () => {
@@ -46,15 +46,15 @@ test("arg overrides keep config defaults but prefer explicit command args", () =
     duration: "30"
   });
 
-  assert.equal(merged.server.enabled, true);
-  assert.equal(merged.client.host, "cli-host");
-  assert.equal(merged.client.port, 5000);
-  assert.equal(merged.client.name, "cli-name");
-  assert.equal(merged.client.team, "blue");
-  assert.equal(merged.client.mode, "native");
-  assert.equal(merged.server.host, "0.0.0.0");
-  assert.equal(merged.server.port, 6000);
-  assert.equal(merged.server.duration, 30);
+  assert.equal(merged.network.server.enabled, true);
+  assert.equal(merged.network.client.host, "cli-host");
+  assert.equal(merged.network.client.port, 5000);
+  assert.equal(merged.game.name, "cli-name");
+  assert.equal(merged.game.team, "blue");
+  assert.equal(merged.game.mode, "native");
+  assert.equal(merged.network.server.host, "0.0.0.0");
+  assert.equal(merged.network.server.port, 6000);
+  assert.equal(merged.game.duration, 30);
 });
 
 test("FILEFRONT_CONFIG_DIR can move local config outside the package", () => {
@@ -92,19 +92,25 @@ test("writeLocalConfig creates FILEFRONT_CONFIG_DIR when needed", () => {
   }
 });
 
-test("obsolete network config is removed when merging or writing", () => {
+test("legacy server and client config is migrated when merging or writing", () => {
   const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), "filefront-obsolete-"));
   const merged = mergeConfig(DEFAULT_LOCAL_CONFIG, {
-    network: { subnet: "obsolete" },
+    server: { enabled: true, duration: 30 },
     client: { host: "arena.local" }
   });
 
-  assert.equal("network" in merged, false);
+  assert.equal(merged.network.server.enabled, true);
+  assert.equal(merged.network.client.host, "arena.local");
+  assert.equal(merged.game.duration, 30);
 
   writeLocalConfig(projectRoot, {
-    ...merged,
-    network: { subnet: "obsolete" }
+    server: { enabled: true },
+    client: { name: "legacy" }
   });
 
-  assert.equal("network" in readLocalConfig(projectRoot), false);
+  const written = readLocalConfig(projectRoot);
+  assert.equal("server" in written, false);
+  assert.equal("client" in written, false);
+  assert.equal(written.network.server.enabled, true);
+  assert.equal(written.game.name, "legacy");
 });

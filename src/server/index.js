@@ -10,9 +10,9 @@ import { fileURLToPath } from "node:url";
 const args = parseArgs(process.argv.slice(2));
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const config = applyArgOverrides(readLocalConfig(projectRoot), args);
-const host = args.host || config.server.host || "0.0.0.0";
-const port = Number(args.port || config.server.port || 31337);
-const durationMinutes = Number(args.duration || config.server.duration || 20);
+const host = args.host || config.network.server.host || "0.0.0.0";
+const port = Number(args.port || config.network.server.port || 31337);
+const durationMinutes = Number(args.duration || config.game.duration || 20);
 
 const match = createMatchState({ durationMinutes });
 const httpServer = http.createServer();

@@ -44,7 +44,7 @@ filefront.config.local.json
 filefront config
 ```
 
-它不会安装依赖，只会打开配置菜单。输入编号只修改对应设置，直接输入 `s` 保存。
+它不会安装依赖，只会打开配置菜单。用方向键选择设置，回车确认。
 
 这个文件只保存在你运行命令的目录，已经加入 `.gitignore`，不要提交。它会记录默认连接地址、玩家名、队伍、窗口模式，以及可选的服务器配置。
 
@@ -78,15 +78,19 @@ filefront join
 
 ```json
 {
-  "server": {
-    "enabled": false,
-    "host": "0.0.0.0",
-    "port": 31337,
-    "duration": 20
+  "network": {
+    "server": {
+      "enabled": false,
+      "host": "0.0.0.0",
+      "port": 31337
+    },
+    "client": {
+      "host": "SERVER_LAN_IP",
+      "port": 31337
+    }
   },
-  "client": {
-    "host": "SERVER_LAN_IP",
-    "port": 31337,
+  "game": {
+    "duration": 20,
     "name": "alice",
     "team": "red",
     "mode": "split"
@@ -94,7 +98,7 @@ filefront join
 }
 ```
 
-`SERVER_LAN_IP` 换成服务端机器的局域网 IP、云服务器公网 IP 或域名。同一台电脑测试用 `localhost`。
+`network` 保存连接地址、端口和是否开服；`game` 保存玩家名、队伍、窗口模式和比赛时长。`SERVER_LAN_IP` 换成服务端机器的局域网 IP、云服务器公网 IP 或域名。同一台电脑测试用 `localhost`。
 
 ## Game Commands
 

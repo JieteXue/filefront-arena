@@ -41,92 +41,196 @@ export async function configureLocalSettings(projectRoot, options = {}) {
 
 async function askFirstSetupConfig(rl, config) {
   console.log("First-time setup");
-  const next = mergeConfig(config, {
-    server: { enabled: false },
-    client: {
-      host: await ask(rl, "Default server host/IP for players", config.client.host)
+  return mergeConfig(config, {
+    network: {
+      server: { enabled: false },
+      client: {
+        host: await ask(rl, "Default server host/IP for players", config.network.client.host)
+      }
     }
   });
-  return next;
 }
 
 async function editConfigMenu(rl, initialConfig) {
   let next = mergeConfig(DEFAULT_LOCAL_CONFIG, initialConfig);
 
   while (true) {
-    printConfigMenu(next);
-    const choice = (await ask(rl, "Choose a number to edit, s to save, r to reset, q to quit", "s")).toLowerCase();
+    const fields = configFields(next);
+    const action = await selectOption("Select a setting to edit", [
+      ...fields.map((field) => ({
+        label: `${field.section} / ${field.label}`,
+        detail: field.value,
+        field
+      })),
+      { label: "Save and exit", detail: "", action: "save" },
+      { label: "Reset to defaults", detail: "", action: "reset" },
+      { label: "Quit without saving", detail: "", action: "quit" }
+    ]);
 
-    if (["", "s", "save"].includes(choice)) {
+    if (action.action === "save") {
       return next;
     }
 
-    if (["q", "quit"].includes(choice)) {
+    if (action.action === "quit") {
       console.log("Config unchanged.");
       return null;
     }
 
-    if (["r", "reset"].includes(choice)) {
+    if (action.action === "reset") {
       next = mergeConfig(DEFAULT_LOCAL_CONFIG, {});
       continue;
     }
 
-    next = await editConfigField(rl, next, choice);
+    next = await editConfigField(rl, next, action.field);
   }
 }
 
-function printConfigMenu(config) {
-  console.log("");
-  console.log("Current config:");
-  console.log(`  1  Host game server: ${formatYesNo(config.server.enabled)}`);
-  console.log(`  2  Server listen host: ${config.server.host}`);
-  console.log(`  3  Server port: ${config.server.port}`);
-  console.log(`  4  Match duration minutes: ${config.server.duration}`);
-  console.log(`  5  Default server host/IP: ${config.client.host}`);
-  console.log(`  6  Default server port: ${config.client.port}`);
-  console.log(`  7  Default player name: ${config.client.name}`);
-  console.log(`  8  Default team: ${config.client.team}`);
-  console.log(`  9  Default client mode: ${config.client.mode}`);
-  console.log("");
-  console.log("Enter a number to edit one setting, or s/r/q.");
+function configFields(config) {
+  return [
+    {
+      section: "Network",
+      label: "Host game server",
+      value: formatYesNo(config.network.server.enabled),
+      edit: async (rl, next) => {
+        next.network.server.enabled = await askYesNo(rl, "Will this machine host the game server?", next.network.server.enabled);
+      }
+    },
+    {
+      section: "Network",
+      label: "Server listen host",
+      value: config.network.server.host,
+      edit: async (rl, next) => {
+        next.network.server.host = await ask(rl, "Server listen host", next.network.server.host);
+      }
+    },
+    {
+      section: "Network",
+      label: "Server port",
+      value: config.network.server.port,
+      edit: async (rl, next) => {
+        next.network.server.port = await askNumber(rl, "Server port", next.network.server.port);
+      }
+    },
+    {
+      section: "Network",
+      label: "Default server host/IP",
+      value: config.network.client.host,
+      edit: async (rl, next) => {
+        next.network.client.host = await ask(rl, "Default server host/IP for players", next.network.client.host);
+      }
+    },
+    {
+      section: "Network",
+      label: "Default server port",
+      value: config.network.client.port,
+      edit: async (rl, next) => {
+        next.network.client.port = await askNumber(rl, "Default server port for players", next.network.client.port);
+      }
+    },
+    {
+      section: "Game",
+      label: "Match duration minutes",
+      value: config.game.duration,
+      edit: async (rl, next) => {
+        next.game.duration = await askNumber(rl, "Match duration minutes", next.game.duration);
+      }
+    },
+    {
+      section: "Game",
+      label: "Default player name",
+      value: config.game.name,
+      edit: async (rl, next) => {
+        next.game.name = await ask(rl, "Default player name", next.game.name);
+      }
+    },
+    {
+      section: "Game",
+      label: "Default team",
+      value: config.game.team,
+      edit: async (rl, next) => {
+        next.game.team = await askTeam(rl, next.game.team);
+      }
+    },
+    {
+      section: "Game",
+      label: "Default client mode",
+      value: config.game.mode,
+      edit: async (rl, next) => {
+        next.game.mode = await askMode(rl, next.game.mode);
+      }
+    }
+  ];
 }
 
-async function editConfigField(rl, config, choice) {
+async function editConfigField(rl, config, field) {
   const next = mergeConfig(config, {});
+  await field.edit(rl, next);
+  return next;
+}
 
-  switch (choice) {
-    case "1":
-      next.server.enabled = await askYesNo(rl, "Will this machine host the game server?", next.server.enabled);
-      return next;
-    case "2":
-      next.server.host = await ask(rl, "Server listen host", next.server.host);
-      return next;
-    case "3":
-      next.server.port = await askNumber(rl, "Server port", next.server.port);
-      next.client.port = next.client.port || next.server.port;
-      return next;
-    case "4":
-      next.server.duration = await askNumber(rl, "Match duration minutes", next.server.duration);
-      return next;
-    case "5":
-      next.client.host = await ask(rl, "Default server host/IP for players", next.client.host);
-      return next;
-    case "6":
-      next.client.port = await askNumber(rl, "Default server port for players", next.client.port);
-      return next;
-    case "7":
-      next.client.name = await ask(rl, "Default player name", next.client.name);
-      return next;
-    case "8":
-      next.client.team = await askTeam(rl, next.client.team);
-      return next;
-    case "9":
-      next.client.mode = await askMode(rl, next.client.mode);
-      return next;
-    default:
-      console.log(`Unknown choice: ${choice}`);
-      return next;
-  }
+async function selectOption(title, options) {
+  let selected = 0;
+  let renderedLines = 0;
+
+  const render = () => {
+    if (renderedLines > 0) {
+      output.write(`\x1b[${renderedLines}A\x1b[J`);
+    }
+
+    const lines = [`${title}:`, "Use Up/Down arrows, Enter to select."];
+    for (let index = 0; index < options.length; index += 1) {
+      const option = options[index];
+      const cursor = index === selected ? ">" : " ";
+      const detail = option.detail === "" || option.detail === undefined ? "" : `  ${option.detail}`;
+      lines.push(`${cursor} ${option.label}${detail}`);
+    }
+    output.write(`${lines.join("\n")}\n`);
+    renderedLines = lines.length;
+  };
+
+  return await new Promise((resolve) => {
+    const wasRaw = input.isRaw;
+    input.setRawMode(true);
+    input.resume();
+
+    const cleanup = (value) => {
+      input.setRawMode(wasRaw);
+      input.off("data", onData);
+      output.write("\n");
+      resolve(value);
+    };
+
+    const onData = (chunk) => {
+      const keys = chunk.toString("utf8");
+      for (let index = 0; index < keys.length; index += 1) {
+        const key = keys[index];
+        const sequence = keys.slice(index, index + 3);
+
+        if (key === "\u0003") {
+          cleanup({ action: "quit" });
+          return;
+        }
+        if (key === "\r" || key === "\n") {
+          cleanup(options[selected]);
+          return;
+        }
+        if (sequence === "\u001b[A") {
+          selected = selected === 0 ? options.length - 1 : selected - 1;
+          render();
+          index += 2;
+          continue;
+        }
+        if (sequence === "\u001b[B") {
+          selected = selected === options.length - 1 ? 0 : selected + 1;
+          render();
+          index += 2;
+        }
+      }
+    };
+
+    input.on("data", onData);
+    render();
+  });
 }
 
 async function ask(rl, label, fallback) {
