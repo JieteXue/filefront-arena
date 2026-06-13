@@ -208,43 +208,35 @@ npm run join -- --host SERVER_LAN_IP --name alice --team red --mode ops
 
 ### Linux
 
-Linux 默认不自动打开多个终端。建议手动开三个终端窗口或标签页：
+Linux 会尝试使用系统已有的终端程序打开三个窗口或标签页：
 
 ```bash
 cd /path/to/filefront-arena
+npm run join -- --host SERVER_LAN_IP --name alice --team red
+```
+
+如果当前系统没有 `x-terminal-emulator`、`gnome-terminal`、`konsole`、`xfce4-terminal` 或 `xterm`，命令会打印三条备用命令。也可以手动开三个终端窗口或标签页：
+
+```bash
 npm run join -- --host SERVER_LAN_IP --name alice --team red --mode native
-```
-
-信息窗口：
-
-```bash
 npm run join -- --host SERVER_LAN_IP --name alice --team red --mode info
-```
-
-队内操作日志窗口：
-
-```bash
 npm run join -- --host SERVER_LAN_IP --name alice --team red --mode ops
 ```
 
 ### Windows
 
-在 PowerShell 或 Windows Terminal 中运行。建议打开三个标签页：
+在 PowerShell 或 Windows Terminal 中运行。Windows 会优先使用 Windows Terminal 打开三个标签页：
 
 ```powershell
 cd C:\path\to\filefront-arena
+npm run join -- --host SERVER_LAN_IP --name alice --team red
+```
+
+如果没有安装 Windows Terminal，会尝试打开三个 PowerShell 窗口。也可以手动开三个 PowerShell 标签页：
+
+```powershell
 npm run join -- --host SERVER_LAN_IP --name alice --team red --mode native
-```
-
-信息窗口：
-
-```powershell
 npm run join -- --host SERVER_LAN_IP --name alice --team red --mode info
-```
-
-队内操作日志窗口：
-
-```powershell
 npm run join -- --host SERVER_LAN_IP --name alice --team red --mode ops
 ```
 

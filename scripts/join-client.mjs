@@ -13,7 +13,7 @@ const answers = interactive ? await askMissingArgs(args) : args;
 const server = resolveServerUrl(answers);
 const name = answers.name || "alice";
 const team = answers.team || "red";
-const mode = args.mode || args.ui || (process.platform === "darwin" ? "split" : "native");
+const mode = args.mode || args.ui || "split";
 
 if (mode === "split") {
   runNode(["scripts/open-split-client.mjs", "--server", server, "--name", name, "--team", team]);

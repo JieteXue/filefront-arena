@@ -11,6 +11,7 @@
     "client": "node src/client/index.js",
     "client:split": "node scripts/open-split-client.mjs",
     "join": "node scripts/join-client.mjs",
+    "join:split": "node scripts/open-split-client.mjs",
     "test": "node --test"
   },
   "dependencies": {
