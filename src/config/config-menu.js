@@ -41,27 +41,28 @@ export async function configureLocalSettings(projectRoot, options = {}) {
 
 async function askFirstSetupConfig(rl, config) {
   console.log("First-time setup");
-  return mergeConfig(config, {
+  const next = mergeConfig(config, {
     network: {
       server: { enabled: false },
       client: {
         host: await ask(rl, "Default server host/IP for players", config.network.client.host)
       }
+    },
+    game: {
+      name: await ask(rl, "Default player name", config.game.name),
+      team: await askTeam(rl, config.game.team)
     }
   });
+  return next;
 }
 
 async function editConfigMenu(rl, initialConfig) {
   let next = mergeConfig(DEFAULT_LOCAL_CONFIG, initialConfig);
 
   while (true) {
-    const fields = configFields(next);
-    const action = await selectOption("Select a setting to edit", [
-      ...fields.map((field) => ({
-        label: `${field.section} / ${field.label}`,
-        detail: field.value,
-        field
-      })),
+    const action = await selectOption("Configure filefront-arena", [
+      { label: "Network settings", detail: summarizeNetwork(next), section: "network" },
+      { label: "Game settings", detail: summarizeGame(next), section: "game" },
       { label: "Save and exit", detail: "", action: "save" },
       { label: "Reset to defaults", detail: "", action: "reset" },
       { label: "Quit without saving", detail: "", action: "quit" }
@@ -81,6 +82,28 @@ async function editConfigMenu(rl, initialConfig) {
       continue;
     }
 
+    next = await editConfigSection(rl, next, action.section);
+  }
+}
+
+async function editConfigSection(rl, config, section) {
+  let next = mergeConfig(config, {});
+
+  while (true) {
+    const fields = configFields(next).filter((field) => field.sectionKey === section);
+    const action = await selectOption(`${section === "network" ? "Network" : "Game"} settings`, [
+      ...fields.map((field) => ({
+        label: field.label,
+        detail: field.value,
+        field
+      })),
+      { label: "Back", detail: "", action: "back" }
+    ]);
+
+    if (action.action === "back") {
+      return next;
+    }
+
     next = await editConfigField(rl, next, action.field);
   }
 }
@@ -88,7 +111,7 @@ async function editConfigMenu(rl, initialConfig) {
 function configFields(config) {
   return [
     {
-      section: "Network",
+      sectionKey: "network",
       label: "Host game server",
       value: formatYesNo(config.network.server.enabled),
       edit: async (rl, next) => {
@@ -96,7 +119,7 @@ function configFields(config) {
       }
     },
     {
-      section: "Network",
+      sectionKey: "network",
       label: "Server listen host",
       value: config.network.server.host,
       edit: async (rl, next) => {
@@ -104,7 +127,7 @@ function configFields(config) {
       }
     },
     {
-      section: "Network",
+      sectionKey: "network",
       label: "Server port",
       value: config.network.server.port,
       edit: async (rl, next) => {
@@ -112,7 +135,7 @@ function configFields(config) {
       }
     },
     {
-      section: "Network",
+      sectionKey: "network",
       label: "Default server host/IP",
       value: config.network.client.host,
       edit: async (rl, next) => {
@@ -120,7 +143,7 @@ function configFields(config) {
       }
     },
     {
-      section: "Network",
+      sectionKey: "network",
       label: "Default server port",
       value: config.network.client.port,
       edit: async (rl, next) => {
@@ -128,7 +151,7 @@ function configFields(config) {
       }
     },
     {
-      section: "Game",
+      sectionKey: "game",
       label: "Match duration minutes",
       value: config.game.duration,
       edit: async (rl, next) => {
@@ -136,7 +159,7 @@ function configFields(config) {
       }
     },
     {
-      section: "Game",
+      sectionKey: "game",
       label: "Default player name",
       value: config.game.name,
       edit: async (rl, next) => {
@@ -144,7 +167,7 @@ function configFields(config) {
       }
     },
     {
-      section: "Game",
+      sectionKey: "game",
       label: "Default team",
       value: config.game.team,
       edit: async (rl, next) => {
@@ -152,7 +175,7 @@ function configFields(config) {
       }
     },
     {
-      section: "Game",
+      sectionKey: "game",
       label: "Default client mode",
       value: config.game.mode,
       edit: async (rl, next) => {
@@ -166,6 +189,17 @@ async function editConfigField(rl, config, field) {
   const next = mergeConfig(config, {});
   await field.edit(rl, next);
   return next;
+}
+
+function summarizeNetwork(config) {
+  const hostServer = formatYesNo(config.network.server.enabled);
+  const server = `${config.network.server.host}:${config.network.server.port}`;
+  const client = `${config.network.client.host}:${config.network.client.port}`;
+  return `host ${hostServer}, listen ${server}, join ${client}`;
+}
+
+function summarizeGame(config) {
+  return `${config.game.name}, ${config.game.team}, ${config.game.mode}, ${config.game.duration}m`;
 }
 
 async function selectOption(title, options) {
@@ -234,8 +268,15 @@ async function selectOption(title, options) {
 }
 
 async function ask(rl, label, fallback) {
-  const answer = await rl.question(`${label} [${fallback}]: `);
-  return answer.trim() || fallback;
+  try {
+    const answer = await rl.question(`${label} [${fallback}]: `);
+    return answer.trim() || fallback;
+  } catch (error) {
+    if (error.code === "ERR_USE_AFTER_CLOSE") {
+      return fallback;
+    }
+    throw error;
+  }
 }
 
 async function askNumber(rl, label, fallback) {

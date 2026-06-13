@@ -2,8 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 export const LOCAL_CONFIG_FILE = "filefront.config.local.json";
+export const LOCAL_CONFIG_VERSION = 1;
 
 export const DEFAULT_LOCAL_CONFIG = {
+  version: LOCAL_CONFIG_VERSION,
   network: {
     server: {
       enabled: false,
@@ -55,6 +57,7 @@ export function mergeConfig(base, override) {
   const normalizedBase = normalizeConfig(base);
   const normalizedOverride = normalizeConfig(override, { fillDefaults: false });
   return {
+    version: normalizedOverride.version ?? normalizedBase.version ?? LOCAL_CONFIG_VERSION,
     network: {
       server: {
         ...(normalizedBase.network.server || {}),
@@ -112,6 +115,9 @@ function normalizeConfig(config = {}, options = {}) {
   const defaults = fillDefaults ? DEFAULT_LOCAL_CONFIG : {};
 
   return {
+    ...compactObject({
+      version: config.version ?? defaults.version
+    }),
     network: {
       server: compactObject({
         enabled: legacyServer.enabled ?? network.server?.enabled ?? defaults.network?.server?.enabled,

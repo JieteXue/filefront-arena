@@ -63,6 +63,7 @@ function printHelp() {
 Usage:
   filefront setup
   filefront config
+  filefront config show
   filefront server
   filefront join
   filefront update
@@ -70,6 +71,8 @@ Usage:
 Commands:
   setup    Create local config and install dependencies
   config   Edit local config only
+  config show
+           Print resolved local config
   server   Start the match server
   join     Join using local config
   update   Reinstall the global package from GitHub

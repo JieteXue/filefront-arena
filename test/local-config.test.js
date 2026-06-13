@@ -129,6 +129,7 @@ test("legacy server and client config is migrated when merging or writing", () =
   });
 
   const written = readLocalConfig(projectRoot);
+  assert.equal(written.version, 1);
   assert.equal("server" in written, false);
   assert.equal("client" in written, false);
   assert.equal(written.network.server.enabled, true);
